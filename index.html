@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Sueldo Real</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0d6efd">
+  <style>
+    body { font-family: sans-serif; max-width: 480px; margin: auto; padding: 1em; }
+    h1 { text-align: center; }
+    input, button { width: 100%; padding: .5em; margin: .3em 0; }
+    table { width:100%; border-collapse: collapse; margin-top:1em; }
+    th,td { border:1px solid #ddd; padding: .5em; text-align:left; }
+    .minus { color: red; }
+  </style>
+</head>
+<body>
+  <h1>Mi Sueldo Real</h1>
+
+  <label>🧾 Sueldo base (mes):</label>
+  <input type="number" id="sueldoBase" placeholder="Ej: 520000">
+
+  <h2>🔻 Salidas de mercadería</h2>
+  <input type="text" id="desc" placeholder="Descripción">
+  <input type="number" id="monto" placeholder="Monto">
+  <button onclick="agregarSalida()">Agregar salida</button>
+
+  <h2>Sueldo estimado: $<span id="sueldoEst">0</span></h2>
+
+  <table>
+    <thead><tr><th>Desc</th><th>Monto</th><th>Fecha</th><th></th></tr></thead>
+    <tbody id="tabla"></tbody>
+  </table>
+
+  <script>
+    let salidas = JSON.parse(localStorage.getItem('salidas')) || [];
+    let sueldoBase = parseFloat(localStorage.getItem('sueldoBase')) || 0;
+
+    document.getElementById('sueldoBase').value = sueldoBase;
+    document.getElementById('sueldoBase').addEventListener('change', e => {
+      sueldoBase = parseFloat(e.target.value)||0;
+      localStorage.setItem('sueldoBase', sueldoBase);
+      refrescar();
+    });
+
+    function agregarSalida() {
+      const d = document.getElementById('desc').value.trim();
+      const m = parseFloat(document.getElementById('monto').value)||0;
+      if (!d || m<=0) return alert('Completá descripción y monto mayor a 0.');
+      salidas.push({ d, m, f: new Date().toLocaleDateString() });
+      localStorage.setItem('salidas', JSON.stringify(salidas));
+      document.getElementById('desc').value = '';
+      document.getElementById('monto').value = '';
+      refrescar();
+    }
+
+    function borrar(i) {
+      salidas.splice(i,1);
+      localStorage.setItem('salidas', JSON.stringify(salidas));
+      refrescar();
+    }
+
+    function refrescar() {
+      const tabla = document.getElementById('tabla');
+      tabla.innerHTML = '';
+      const totalSalidas = salidas.reduce((a,x)=>a+x.m,0);
+      document.getElementById('sueldoEst').textContent = (sueldoBase - totalSalidas).toFixed(2);
+
+      salidas.forEac
